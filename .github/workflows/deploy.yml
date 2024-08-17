@@ -2,99 +2,117 @@ name: Deploy to AWS
 
 on:
     workflow_dispatch:
-      inputs:
-        branch:
-          description: 'Branch to deploy'
-          required: true
-          default: 'main'
-        environment:
-          description: 'Environment to deploy to'
-          required: true
-          default: 'development-app1'
-          type: choice
-          options:
-            - development-app1
-            - uat-app1
-            - prod-app1
-        application:
-          description: 'Application to deploy'
-          required: true
-          default: 'app2'
-          type: choice
-          options:
-            - app1
-            - app2
+        inputs:
+            branch:
+                description: 'Branch to deploy'
+                required: true
+                default: 'main'
+            environment:
+                description: 'Environment to deploy to'
+                required: true
+                default: 'ab-development-app1'
+                type: choice
+                options:
+                - ab-development-app1
+                - ab-uat-app1
+                - ab-prod-app1
+            application:
+                description: 'Application to deploy'
+                required: true
+                default: 'app2'
+                type: choice
+                options:
+                - app1
+                - app2
 jobs:
+    check_app:
+        name: Check Folder
+        runs-on: ubuntu-latest
+        outputs:
+            folder: ${{ steps.check_app.outputs.folder }}
+        steps:
+          - name: Check Folder
+            id: check_app
+            run: |
+                if [[ "${{ github.event.inputs.environment }}" == "ab-development-app1" ]]; then
+                # set github env
+                echo "folder=dev" >> $GITHUB_OUTPUT
+                elif [[ "${{ github.event.inputs.environment }}" == "ab-uat-app1" ]]; then
+                echo "folder=uat" >> $GITHUB_OUTPUT
+                elif [[ "${{ github.event.inputs.environment }}" == "ab-prod-app1" ]]; then
+                echo "folder=prod" >> $GITHUB_OUTPUT
+                fi
+
+
     terraform:
-      name: Terraform Plan and Apply
-      runs-on: ubuntu-latest
-      environment: ${{ github.event.inputs.environment }}
-  
-      steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.inputs.branch }}
-  
-      - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v2
-        with:
-          terraform_version: 1.7.5 
-  
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_DEFAULT_REGION }}
-  
-      - name: Terraform Init
-        run: terraform init
-  
-      - name: Terraform Format
-        run: terraform fmt -check
-  
-      - name: Terraform Validate
-        run: terraform validate
-  
-      - name: Terraform Plan
-        id: terraform-plan
-        run: terraform plan -out=plan.tfplan
-  
-    manual_approval:
-      name: Manual Approval
-      needs: terraform
-      runs-on: ubuntu-latest
-      environment:
-        name: ${{ github.event.inputs.environment }}
-        url: https://dev.app1-oars.com/internallogin # Optional: URL for more information
-      steps:
-      - name: Awaiting Approval
-        run: echo "Waiting for manual approval to apply Terraform changes to the ${{ github.event.inputs.environment }} environment"
+        name: Terraform Plan and Apply
+        runs-on: ubuntu-latest
+        needs: check_app
+        environment: "${{ github.event.inputs.environment }}-no-approval"
+    
+        steps:
+        - name: Checkout repository
+          uses: actions/checkout@v4
+          with:
+            ref: ${{ github.event.inputs.branch }}
+
+        - name: Set up Terraform
+          uses: hashicorp/setup-terraform@v2
+          with:
+            terraform_version: 1.7.5 
+
+        - name: Move to Terraform directory
+          run: cd terraform/${{ needs.check_app.outputs.folder }}/${{ github.event.inputs.folder }}_${{ github.event.inputs.application }}
+
+        - name: Configure AWS Credentials
+          uses: aws-actions/configure-aws-credentials@v2
+          with:
+            aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+            aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+            aws-region: ${{ secrets.AWS_DEFAULT_REGION }}
+
+        - name: Terraform Init
+          run: terraform init
+
+        - name: Terraform Format
+          run: terraform fmt -check
+
+        - name: Terraform Validate
+          run: terraform validate
+
+        - name: Terraform Plan
+          id: terraform-plan
+          run: terraform plan -out=plan.tfplan
   
     apply_terraform:
-      name: Apply Terraform
-      needs: manual_approval
-      runs-on: ubuntu-latest
-  
-      steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.inputs.branch }}
-  
-      - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v2
-        with:
-          terraform_version: 1.7.5
-  
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_DEFAULT_REGION }}
-  
-      - name: Apply Terraform
-        run: terraform apply -auto-approve plan.tfplan
-  
+        name: Apply Terraform
+        needs: [terraform, check_app]
+        runs-on: ubuntu-latest
+        environment:
+            name: ${{ github.event.inputs.environment }}
+            url: https://demo.com
+    
+        steps:
+        - name: Checkout repository
+          uses: actions/checkout@v4
+          with:
+            ref: ${{ github.event.inputs.branch }}
+    
+        - name: Set up Terraform
+          uses: hashicorp/setup-terraform@v2
+          with:
+            terraform_version: 1.7.5
+        
+        - name: Move to Terraform directory
+          run: cd terraform/${{ needs.check_app.outputs.folder }}/${{ github.event.inputs.folder }}_${{ github.event.inputs.application }}
+
+        - name: Configure AWS Credentials
+          uses: aws-actions/configure-aws-credentials@v2
+          with:
+            aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+            aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+            aws-region: ${{ secrets.AWS_DEFAULT_REGION }}
+    
+        - name: Apply Terraform
+          run: terraform apply -auto-approve plan.tfplan
+    

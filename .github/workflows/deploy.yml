@@ -87,6 +87,12 @@ jobs:
           id: terraform-plan
           run: terraform plan -out=plan.tfplan
 
+        - name: ls
+          run: |
+            ls   
+            pwd
+            
+
         - name: Uploading the txt file
           uses: actions/upload-artifact@v3
           with:

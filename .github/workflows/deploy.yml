@@ -87,17 +87,11 @@ jobs:
           id: terraform-plan
           run: terraform plan -out=plan.tfplan
 
-        - name: ls
-          run: |
-            ls   
-            pwd
-            
-
         - name: Uploading the txt file
           uses: actions/upload-artifact@v3
           with:
             name: tfplan
-            path: plan.tfplan
+            path: terraform/${{ needs.check_app.outputs.folder }}/${{ needs.check_app.outputs.folder }}_${{ github.event.inputs.application }}/plan.tfplan
 
     apply_terraform:
         name: Apply Terraform
@@ -131,6 +125,10 @@ jobs:
           uses: actions/download-artifact@v3
           with:
             name: tfplan
+
+        - run: |
+            ls
+            pwd
 
         - name: Apply Terraform
           run: terraform apply -auto-approve plan.tfplan

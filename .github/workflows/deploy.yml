@@ -85,20 +85,20 @@ jobs:
 
         - name: Terraform Plan
           id: terraform-plan
-          run: terraform plan -out=plan.tfplan
+          run: terraform plan -out=plan.hcl
 
         - name: Uploading the txt file
           uses: actions/upload-artifact@v3
           with:
             name: tfplan
-            path: terraform/${{ needs.check_app.outputs.folder }}/${{ needs.check_app.outputs.folder }}_${{ github.event.inputs.application }}/plan.tfplan
+            path: terraform/${{ needs.check_app.outputs.folder }}/${{ needs.check_app.outputs.folder }}_${{ github.event.inputs.application }}/*.hcl
 
     apply_terraform:
         name: Apply Terraform
         needs: [terraform, check_app]
         runs-on: ubuntu-latest
         environment:
-            name: ${{ github.event.inputs.environment }}
+            name: ${{ github.event.inputs.environment }}-no-approval
             url: https://demo.com
         defaults:
             run:
@@ -132,7 +132,9 @@ jobs:
             cd ../../..
             ls -la
             pwd
+            cd terraform/${{ needs.check_app.outputs.folder }}/${{ needs.check_app.outputs.folder }}_${{ github.event.inputs.application }}
+            mv ../../../*.hcl .
 
         - name: Apply Terraform
-          run: terraform apply -auto-approve ../../../plan.tfplan
+          run: terraform apply -auto-approve plan.hcl
     

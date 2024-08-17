@@ -94,7 +94,9 @@ jobs:
         environment:
             name: ${{ github.event.inputs.environment }}
             url: https://demo.com
-    
+        defaults:
+            run:
+                working-directory: terraform/${{ needs.check_app.outputs.folder }}/${{ needs.check_app.outputs.folder }}_${{ github.event.inputs.application }}    
         steps:
         - name: Checkout repository
           uses: actions/checkout@v4
@@ -105,9 +107,6 @@ jobs:
           uses: hashicorp/setup-terraform@v2
           with:
             terraform_version: 1.7.5
-        
-        - name: Move to Terraform directory
-          run: cd terraform/${{ needs.check_app.outputs.folder }}/${{ github.event.inputs.folder }}_${{ github.event.inputs.application }}
 
         - name: Configure AWS Credentials
           uses: aws-actions/configure-aws-credentials@v2

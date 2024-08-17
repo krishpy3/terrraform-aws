@@ -62,7 +62,7 @@ jobs:
             terraform_version: 1.7.5 
 
         - name: Move to Terraform directory
-          run: cd terraform/${{ needs.check_app.outputs.folder }}/${{ github.event.inputs.folder }}_${{ github.event.inputs.application }}
+          run: cd terraform/${{ needs.check_app.outputs.folder }}/${{ needs.check_app.outputs.folder }}_${{ github.event.inputs.application }}
 
         - name: Configure AWS Credentials
           uses: aws-actions/configure-aws-credentials@v2

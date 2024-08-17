@@ -86,7 +86,13 @@ jobs:
         - name: Terraform Plan
           id: terraform-plan
           run: terraform plan -out=plan.tfplan
-  
+
+        - name: Uploading the txt file
+          uses: actions/upload-artifact@v3
+          with:
+            name: tfplan
+            path: plan.tfplan
+
     apply_terraform:
         name: Apply Terraform
         needs: [terraform, check_app]
@@ -114,7 +120,12 @@ jobs:
             aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
             aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
             aws-region: ${{ env.AWS_REGION }}
-    
+
+        - name: Download the artifact
+          uses: actions/download-artifact@v3
+          with:
+            name: tfplan
+
         - name: Apply Terraform
           run: terraform apply -auto-approve plan.tfplan
     

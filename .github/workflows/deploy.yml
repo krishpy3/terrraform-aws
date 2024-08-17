@@ -129,13 +129,10 @@ jobs:
         - run: |
             ls -la
             pwd
-            cd ..
-            ls -la
-            pwd
-            cd ..
+            cd ../../..
             ls -la
             pwd
 
         - name: Apply Terraform
-          run: terraform apply -auto-approve ../../plan.tfplan
+          run: terraform apply -auto-approve ../../../plan.tfplan
     

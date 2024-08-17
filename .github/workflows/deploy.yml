@@ -121,6 +121,9 @@ jobs:
             aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
             aws-region: ${{ env.AWS_REGION }}
 
+        - name: Terraform Init
+          run: terraform init
+  
         - name: Download the artifact
           uses: actions/download-artifact@v3
           with:

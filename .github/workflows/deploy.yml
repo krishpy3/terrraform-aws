@@ -120,5 +120,5 @@ jobs:
         name: tfplan
 
     - name: Apply Terraform
-      run: terraform apply -auto-approve ../../../plan.hcl
+      run: terraform apply -auto-approve ../../../plan.tfplan
   

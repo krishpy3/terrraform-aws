@@ -65,8 +65,8 @@ jobs:
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v2
       with:
-        aws-access-key-id: ${{ secrets['AWS_ACCESS_KEY_ID_'+ needs.check_app.outputs.folder] }}
-        aws-secret-access-key: ${{ secrets['AWS_SECRET_ACCESS_KEY_'+ needs.check_app.outputs.folder] }}
+        aws-access-key-id: ${{ secrets[format('{0}_{1}', 'AWS_ACCESS_KEY_ID', needs.check_app.outputs.folder)] }}
+        aws-secret-access-key: ${{ secrets[format('{0}_{1}', 'AWS_SECRET_ACCESS_KEY', needs.check_app.outputs.folder)] }}
         aws-region: ${{ env.AWS_REGION }}
 
     - name: Terraform Init
@@ -107,8 +107,8 @@ jobs:
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v2
       with:
-        aws-access-key-id: ${{ secrets['AWS_ACCESS_KEY_ID_'+ needs.check_app.outputs.folder] }}
-        aws-secret-access-key: ${{ secrets['AWS_SECRET_ACCESS_KEY_'+ needs.check_app.outputs.folder] }}
+        aws-access-key-id: ${{ secrets[format('{0}_{1}', 'AWS_ACCESS_KEY_ID', needs.check_app.outputs.folder)] }}
+        aws-secret-access-key: ${{ secrets[format('{0}_{1}', 'AWS_SECRET_ACCESS_KEY', needs.check_app.outputs.folder)] }}
         aws-region: ${{ env.AWS_REGION }}
 
     - name: Terraform Init

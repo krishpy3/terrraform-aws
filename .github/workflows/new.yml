@@ -1,0 +1,30 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+    
+    - name: Set environment variable
+      run: echo "ENVIRONMENT=DEV" >> $GITHUB_ENV
+      # Replace `dev` with your logic to determine the environment, e.g., based on the branch
+
+    - name: Set AWS access key ID
+      run: echo "AWS_ACCESS_KEY_ID=${{ secrets['AWS_ACCESS_KEY_ID_' + env.ENVIRONMENT] }}" >> $GITHUB_ENV
+
+    - name: Set AWS secret access key
+      run: echo "AWS_SECRET_ACCESS_KEY=${{ secrets['AWS_SECRET_ACCESS_KEY_' + env.ENVIRONMENT] }}" >> $GITHUB_ENV
+
+    - name: Use the AWS credentials
+      run: |
+        import os
+        for i in os.environ.get('AWS_ACCESS_KEY_ID', 'NO'):
+            print(i)
+      shell: python

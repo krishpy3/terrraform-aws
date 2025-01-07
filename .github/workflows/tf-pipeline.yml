@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - 'beta/*'
+      - 'beta/**'
     # paths:
     #   - 'terraform/dev/dev_app2/*.tf' 
     #   - 'terraform/dev/dev_app2/*.tfvars'  

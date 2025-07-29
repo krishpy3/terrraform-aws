@@ -8,7 +8,7 @@ on:
       - main
     paths:
       - 'terraform/dev/dev_app2/*.tf' 
-      - 'terraform/dev/dev_app2/*.tfvars'  
+      # - 'terraform/dev/dev_app2/*.tfvars'  
 jobs:
   build:
     runs-on: ubuntu-latest

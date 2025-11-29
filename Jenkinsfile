@@ -29,14 +29,14 @@ pipeline {
             }
         }
 
-        stage('Select Workspace') {
-            steps {
-                sh """
-                terraform workspace select ${TF_WORKSPACE} || \
-                terraform workspace new ${TF_WORKSPACE}
-                """
-            }
-        }
+        // stage('Select Workspace') {
+        //     steps {
+        //         sh """
+        //         terraform workspace select ${TF_WORKSPACE} || \
+        //         terraform workspace new ${TF_WORKSPACE}
+        //         """
+        //     }
+        // }
 
         stage('Plan') {
             steps {
